@@ -15,9 +15,10 @@
   const chrome = (s, i) => `${s.note ? `<div class="note">${esc(s.note)}</div>` : ''}<div class="page-no">${String(i+1).padStart(2,'0')}</div>`;
 
   function renderSlide(s, i) {
-    const classes = ['slide',`layout-${s.layout || 'split'}`,s.theme === 'dark' ? 'theme-dark' : '',s.reverse ? 'reverse':'',s.align === 'right' ? 'align-right':'',s.compactMedia ? 'media-compact':''].filter(Boolean).join(' ');
+    const classes = ['slide',`layout-${s.layout || 'split'}`,s.theme === 'dark' ? 'theme-dark' : '',s.reverse ? 'reverse':'',s.align === 'right' ? 'align-right':'',s.compactMedia ? 'media-compact':'',s.spaciousItems ? 'spacious-items':'',s.map ? 'has-map':''].filter(Boolean).join(' ');
     const bg = s.image && ['photo','chapter','contact'].includes(s.layout) ? `<img class="slide__bg" src="${esc(s.image)}" alt="${esc(s.alt || s.title || '')}" decoding="async"><div class="slide__veil"></div>` : '';
     let content = '';
+    let overlay = '';
     if (s.layout === 'cover') {
       const coverTitle = esc(s.title).replace(' &amp; ', ' &amp;<br>');
       content = `<div class="cover-copy"><div class="cover-tag">${esc(s.tag || data.label)}</div>${reveal(`<div class="brand">K189</div>`)}${reveal(`<h1 class="cover-title">${coverTitle}</h1>`)}${s.body ? reveal(`<p class="cover-subtitle">${esc(s.body)}</p>`) : ''}</div><figure class="cover-media reveal">${img(s.image,s.alt || 'Фасад комплекса K189')}${s.location ? `<figcaption>${esc(s.location)}</figcaption>`:''}</figure>${metrics(s.metrics)}`;
@@ -36,18 +37,19 @@
     } else if (s.layout === 'document') {
       content = `${heading(s)}<div class="doc-columns">${s.groups.map(g=>`<div><div class="doc-heading">${esc(g.title)}</div>${items(g.items)}</div>`).join('')}</div>${s.bottom ? `<div class="bottom-line reveal">${esc(s.bottom)}</div>`:''}`;
     } else if (s.layout === 'contact') {
+      overlay = s.map ? `<div class="contact-map reveal"><div class="contact-map__interactive" role="region" aria-label="Интерактивная карта расположения K189"></div><img class="contact-map__print" src="../assets/location_map.png" alt="Карта расположения K189 на Кабардинской, 189"><a href="https://www.openstreetmap.org/?mlat=43.501057&amp;mlon=43.635125#map=17/43.501057/43.635125" target="_blank" rel="noopener">Кабардинская, 189 · открыть карту ↗</a></div>` : '';
       content = `${reveal(`<div class="brand">K189</div>`)}${heading(s)}<div class="contact-links reveal"><a href="tel:+79640330186">+7 964 033-01-86</a><a href="mailto:tomabloom@mail.ru">tomabloom@mail.ru</a></div><div class="contact-meta reveal">WhatsApp &nbsp;•&nbsp; Telegram &nbsp;•&nbsp; Email</div><div class="terms">Коммерческие условия — по запросу</div>`;
     } else {
       content = `${heading(s)}${items(s.items)}${s.bottom ? `<div class="bottom-line reveal">${esc(s.bottom)}</div>`:''}`;
     }
-    return `<section class="${classes}" id="slide-${i+1}" data-title="${esc(s.title || 'K189')}">${bg}<div class="slide__inner">${content}</div>${chrome(s,i)}</section>`;
+    return `<section class="${classes}" id="slide-${i+1}" data-title="${esc(s.title || 'K189')}">${bg}<div class="slide__inner">${content}</div>${overlay}${chrome(s,i)}</section>`;
   }
 
   document.body.classList.add(data.slug === 'short' ? 'deck-short' : 'deck-long');
   document.body.insertAdjacentHTML('afterbegin', `
     <div class="progress"><span></span></div>
     <nav class="deck-nav" aria-label="Навигация по презентации">
-      <a class="nav-brand" href="../" aria-label="К выбору презентации">K189</a>
+      <a class="nav-brand" href="../" aria-label="К выбору материалов">K189</a>
       <span class="nav-label">${esc(data.label)}</span>
       <div class="nav-actions"><span class="counter">01 / ${String(data.slides.length).padStart(2,'0')}</span><button class="icon-btn overview-open" aria-label="Открыть обзор">☷</button><button class="icon-btn fullscreen" aria-label="Полный экран">⛶</button></div>
     </nav>
@@ -55,6 +57,19 @@
     <div class="deck-arrows"><button class="icon-btn prev" aria-label="Предыдущая страница">↑</button><button class="icon-btn next" aria-label="Следующая страница">↓</button></div>
     <aside class="overview" aria-hidden="true"><div class="overview__head"><h2>Все страницы</h2><button class="icon-btn overview-close" aria-label="Закрыть обзор">×</button></div><div class="overview__grid">${data.slides.map((s,i)=>`<button class="overview-card" data-go="${i}"><span>${String(i+1).padStart(2,'0')}</span><strong>${esc(s.title || 'K189')}</strong></button>`).join('')}</div></aside>
   `);
+
+  const contactMap = document.querySelector('.contact-map__interactive');
+  if (contactMap && window.L) {
+    const map = window.L.map(contactMap,{center:[43.501057,43.635125],zoom:17,zoomControl:false,scrollWheelZoom:false});
+    window.L.control.zoom({position:'topright'}).addTo(map);
+    map.attributionControl.setPrefix(false);
+    window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19,
+      attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+    }).addTo(map);
+    window.L.circleMarker([43.501057,43.635125],{radius:9,color:'#fff',weight:3,fillColor:'#b28b52',fillOpacity:1}).addTo(map).bindTooltip('Кабардинская, 189');
+    setTimeout(()=>map.invalidateSize(),0);
+  }
 
   const slides = [...document.querySelectorAll('.slide')];
   const progress = document.querySelector('.progress span');
