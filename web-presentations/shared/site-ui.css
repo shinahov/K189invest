@@ -103,8 +103,10 @@ html[data-theme="night"] footer { color: #bbb8b0; }
 html[data-theme="night"] .version-actions a { color: #f4efe6; border-color: #d1b37e55; }
 html[data-theme="night"] .version-actions a:first-child { color: #081720; background: #d1b37e; }
 
-html[data-theme="night"] .deck-shell,
+html[data-theme="night"] .deck-shell { background: transparent; }
 html[data-theme="night"] .slide { background: #0d2029; }
+html[data-theme="night"] .slide.theme-dark,
+html[data-theme="night"] .layout-cover .slide__inner { background: var(--navy); }
 html[data-theme="night"] .slide:not(.theme-dark) { color: #f4efe6; }
 html[data-theme="night"] .slide:not(.theme-dark) .title,
 html[data-theme="night"] .slide:not(.theme-dark) .item__title,

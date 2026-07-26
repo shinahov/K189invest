@@ -2,6 +2,7 @@
   'use strict';
   const data = window.DECK_DATA;
   if (!data || !Array.isArray(data.slides)) throw new Error('Deck data is missing');
+  const cinematicLayouts = new Set(['cover','photo','chapter','statement','contact']);
 
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
   const img = (src, alt = '') => `<img src="${esc(src)}" alt="${esc(alt)}" loading="eager" decoding="async" fetchpriority="${data.slides[0]?.image === src ? 'high' : 'auto'}">`;
@@ -15,7 +16,8 @@
   const chrome = (s, i) => `${s.note ? `<div class="note">${esc(s.note)}</div>` : ''}<div class="page-no">${String(i+1).padStart(2,'0')}</div>`;
 
   function renderSlide(s, i) {
-    const classes = ['slide',`layout-${s.layout || 'split'}`,s.theme === 'dark' ? 'theme-dark' : '',s.reverse ? 'reverse':'',s.align === 'right' ? 'align-right':'',s.compactMedia ? 'media-compact':'',s.spaciousItems ? 'spacious-items':'',s.map ? 'has-map':''].filter(Boolean).join(' ');
+    const darkSurface = s.theme === 'dark' && cinematicLayouts.has(s.layout);
+    const classes = ['slide',`layout-${s.layout || 'split'}`,darkSurface ? 'theme-dark' : '',s.reverse ? 'reverse':'',s.align === 'right' ? 'align-right':'',s.compactMedia ? 'media-compact':'',s.spaciousItems ? 'spacious-items':'',s.map ? 'has-map':''].filter(Boolean).join(' ');
     const bg = s.image && ['photo','chapter','contact'].includes(s.layout) ? `<img class="slide__bg" src="${esc(s.image)}" alt="${esc(s.alt || s.title || '')}" decoding="async"><div class="slide__veil"></div>` : '';
     let content = '';
     let overlay = '';
