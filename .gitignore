@@ -1,2 +1,20 @@
 qa/
 qa-server.mjs
+
+# Local source material and working notes
+/1/
+/2/
+/3/
+/4/
+/how should look+-/
+/new images/
+/agent.md
+/codex.md
+
+# Generated or duplicated workspaces
+/output/
+/tmp/
+/web-design-showcase/
+/web-presentations/short-v2/
+/web-presentations/tools/build-short-compact.mjs
+/web-presentations/tools/qa-short-v2.mjs

@@ -11,7 +11,8 @@
     "schema": "short-version.schema.json"
   },
   "sourcePriority": [
-    "outputs/K189_Kurz_RU_v2.pptx",
+    "web-presentations/short/deck.js",
+    "web-presentations/long/deck.js",
     "codex.md",
     "agent.md",
     "предоставленные фотографии и выписки ЕГРН"
