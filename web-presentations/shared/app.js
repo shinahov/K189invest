@@ -14,6 +14,8 @@
     return `<div class="item reveal"><div class="item__title">${esc(value.title)}</div>${value.desc ? `<div class="item__desc">${esc(value.desc)}</div>` : ''}</div>`;
   }).join('')}</div>` : '';
   const chrome = (s, i) => `${s.note ? `<div class="note">${esc(s.note)}</div>` : ''}<div class="page-no">${String(i+1).padStart(2,'0')}</div>`;
+  const galleryItems = Array.isArray(data.gallery) ? data.gallery : [];
+  const galleryMarkup = galleryItems.map(photo => `<button class="photo-gallery__item" type="button"><figure><img src="${esc(photo.src)}" alt="${esc(photo.label)}" loading="lazy" decoding="async"><figcaption>${esc(photo.label)}</figcaption></figure></button>`).join('');
 
   function renderSlide(s, i) {
     const darkSurface = s.theme === 'dark' && cinematicLayouts.has(s.layout);
@@ -39,7 +41,7 @@
     } else if (s.layout === 'document') {
       content = `${heading(s)}<div class="doc-columns">${s.groups.map(g=>`<div><div class="doc-heading">${esc(g.title)}</div>${items(g.items)}</div>`).join('')}</div>${s.bottom ? `<div class="bottom-line reveal">${esc(s.bottom)}</div>`:''}`;
     } else if (s.layout === 'contact') {
-      overlay = s.map ? `<div class="contact-map reveal"><div class="contact-map__interactive" role="region" aria-label="Интерактивная карта расположения K189"></div><img class="contact-map__print" src="../assets/location_map.png" alt="Карта расположения K189 на Кабардинской, 189"><a href="https://www.openstreetmap.org/?mlat=43.501057&amp;mlon=43.635125#map=17/43.501057/43.635125" target="_blank" rel="noopener">Кабардинская, 189 · открыть карту ↗</a></div>` : '';
+      overlay = s.map ? `<div class="contact-map reveal"><iframe class="contact-map__frame" title="Карта расположения K189 на Кабардинской, 189" src="https://www.openstreetmap.org/export/embed.html?bbox=43.631925%2C43.498757%2C43.638325%2C43.503357&amp;layer=mapnik&amp;marker=43.501057%2C43.635125" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a href="https://www.openstreetmap.org/?mlat=43.501057&amp;mlon=43.635125#map=17/43.501057/43.635125" target="_blank" rel="noopener">Кабардинская, 189 · открыть карту ↗</a></div>` : '';
       content = `${reveal(`<div class="brand">K189</div>`)}${heading(s)}<div class="contact-links reveal"><a href="tel:+79640330186">+7 964 033-01-86</a><a href="mailto:tomabloom@mail.ru">tomabloom@mail.ru</a></div><div class="contact-meta reveal">WhatsApp &nbsp;•&nbsp; Telegram &nbsp;•&nbsp; Email</div><div class="terms">Коммерческие условия — по запросу</div>`;
     } else {
       content = `${heading(s)}${items(s.items)}${s.bottom ? `<div class="bottom-line reveal">${esc(s.bottom)}</div>`:''}`;
@@ -51,32 +53,21 @@
   document.body.insertAdjacentHTML('afterbegin', `
     <div class="progress"><span></span></div>
     <nav class="deck-nav" aria-label="Навигация по презентации">
-      <a class="nav-brand" href="../" aria-label="К выбору материалов">K189</a>
+      <a class="nav-brand" href="../#slide-1" aria-label="К началу презентации">K189</a>
       <span class="nav-label">${esc(data.label)}</span>
-      <div class="nav-actions"><span class="counter">01 / ${String(data.slides.length).padStart(2,'0')}</span><button class="icon-btn overview-open" aria-label="Открыть обзор">☷</button><button class="icon-btn fullscreen" aria-label="Полный экран">⛶</button></div>
+      <div class="nav-actions"><button class="nav-text-btn photo-gallery-open" type="button" aria-label="Открыть галерею фотографий">Галерея</button><span class="counter">01 / ${String(data.slides.length).padStart(2,'0')}</span><button class="icon-btn overview-open" aria-label="Открыть обзор">☷</button><button class="icon-btn fullscreen" aria-label="Полный экран">⛶</button></div>
     </nav>
     <main class="deck-shell">${data.slides.map(renderSlide).join('')}</main>
     <div class="deck-arrows"><button class="icon-btn prev" aria-label="Предыдущая страница">↑</button><button class="icon-btn next" aria-label="Следующая страница">↓</button></div>
     <aside class="overview" aria-hidden="true"><div class="overview__head"><h2>Все страницы</h2><button class="icon-btn overview-close" aria-label="Закрыть обзор">×</button></div><div class="overview__grid">${data.slides.map((s,i)=>`<button class="overview-card" data-go="${i}"><span>${String(i+1).padStart(2,'0')}</span><strong>${esc(s.title || 'K189')}</strong></button>`).join('')}</div></aside>
+    <aside class="photo-gallery" aria-hidden="true"><div class="photo-gallery__head"><div><span>Фотографии объекта</span><h2>Галерея</h2></div><button class="icon-btn photo-gallery-close" type="button" aria-label="Закрыть галерею">×</button></div><div class="photo-gallery__grid">${galleryMarkup}</div></aside>
   `);
-
-  const contactMap = document.querySelector('.contact-map__interactive');
-  if (contactMap && window.L) {
-    const map = window.L.map(contactMap,{center:[43.501057,43.635125],zoom:17,zoomControl:false,scrollWheelZoom:false});
-    window.L.control.zoom({position:'topright'}).addTo(map);
-    map.attributionControl.setPrefix(false);
-    window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:19,
-      attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
-    }).addTo(map);
-    window.L.circleMarker([43.501057,43.635125],{radius:9,color:'#fff',weight:3,fillColor:'#b28b52',fillOpacity:1}).addTo(map).bindTooltip('Кабардинская, 189');
-    setTimeout(()=>map.invalidateSize(),0);
-  }
 
   const slides = [...document.querySelectorAll('.slide')];
   const progress = document.querySelector('.progress span');
   const counter = document.querySelector('.counter');
   const overview = document.querySelector('.overview');
+  const photoGallery = document.querySelector('.photo-gallery');
   const nav = document.querySelector('.deck-nav');
   const motion = window.Motion;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -179,11 +170,32 @@
 
   document.querySelector('.prev').addEventListener('click',()=>go(active-1));
   document.querySelector('.next').addEventListener('click',()=>go(active+1));
-  document.querySelector('.overview-open').addEventListener('click',()=>{overview.classList.add('is-open');overview.setAttribute('aria-hidden','false');});
+  const closePhotoGallery = () => {
+    photoGallery.classList.remove('is-open');
+    photoGallery.setAttribute('aria-hidden','true');
+    document.body.classList.remove('photo-gallery-open');
+  };
+  document.querySelector('.photo-gallery-open').addEventListener('click',()=>{
+    overview.classList.remove('is-open');
+    overview.setAttribute('aria-hidden','true');
+    photoGallery.classList.add('is-open');
+    photoGallery.setAttribute('aria-hidden','false');
+    document.body.classList.add('photo-gallery-open');
+    photoGallery.scrollTop = 0;
+  });
+  document.querySelector('.photo-gallery-close').addEventListener('click',closePhotoGallery);
+  document.querySelectorAll('.photo-gallery__item').forEach(button => button.addEventListener('click', event => {
+    if (event.target.tagName !== 'IMG') button.querySelector('img').click();
+  }));
+  document.querySelector('.overview-open').addEventListener('click',()=>{closePhotoGallery();overview.classList.add('is-open');overview.setAttribute('aria-hidden','false');});
   document.querySelector('.overview-close').addEventListener('click',()=>{overview.classList.remove('is-open');overview.setAttribute('aria-hidden','true');});
   document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>{overview.classList.remove('is-open');go(Number(btn.dataset.go));}));
   document.querySelector('.fullscreen').addEventListener('click',()=>document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.());
   document.addEventListener('keydown',e=>{
+    if (photoGallery.classList.contains('is-open')) {
+      if (e.key === 'Escape') closePhotoGallery();
+      return;
+    }
     if (overview.classList.contains('is-open') && e.key === 'Escape') { overview.classList.remove('is-open'); return; }
     if (['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); go(active+1); }
     if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); go(active-1); }

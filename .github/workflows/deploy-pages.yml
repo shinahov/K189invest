@@ -1,4 +1,4 @@
-name: Deploy Design 4 site to GitHub Pages
+name: Deploy K189invest to GitHub Pages
 
 on:
   push:
@@ -27,11 +27,13 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare Design 4 site
+      - name: Prepare the short presentation site
         run: |
           mkdir -p _site
-          cp web-presentations/index.html web-presentations/landing.css web-presentations/landing.js web-presentations/.nojekyll _site/
-          cp -R web-presentations/assets web-presentations/downloads web-presentations/shared web-presentations/short web-presentations/long _site/
+          mkdir -p _site/short
+          cp web-presentations/index.html web-presentations/.nojekyll _site/
+          cp web-presentations/short/deck.js _site/short/
+          cp -R web-presentations/assets web-presentations/shared _site/
 
       - name: Upload Design 4 site
         uses: actions/upload-pages-artifact@v3
